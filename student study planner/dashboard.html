@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #2575fc;
+            --secondary-color: #6a11cb;
+            --accent-color: #28a745;
+            --danger-color: #dc3545;
+            --text-color: #333;
+            --light-bg: #f4f7f9;
+            --card-bg: white;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .navbar .logout-btn {
+            background: none;
+            border: 2px solid white;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+            font-weight: 600;
+        }
+
+        .navbar .logout-btn:hover {
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .dashboard-container {
+            padding: 2rem;
+        }
+
+        .welcome-section {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .welcome-section h2 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        #userIdDisplay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        
+        .dashboard-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: space-between;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            flex: 1 1 45%; 
+            min-width: 300px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        li {
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        li:last-child {
+            border-bottom: none;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .add-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .add-form input, .add-form select {
+            flex-grow: 1;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .add-form input[type="date"],
+        .add-form input[type="time"] {
+            max-width: 150px;
+        }
+        
+        .add-form button {
+            padding: 0.5rem 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-form button:hover {
+            background: var(--secondary-color);
+        }
+
+        .card button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+        
+        .card button.delete-btn {
+            background: var(--danger-color);
+        }
+
+        .card button.delete-btn:hover {
+            background: #a91524;
+        }
+
+        .card button.complete-btn, .plan-step-complete-btn {
+            background: var(--accent-color);
+        }
+
+        .card button.complete-btn:hover, .plan-step-complete-btn:hover {
+            background: #1e7e34;
+        }
+
+        .stats-card {
+            background: #e9ecef;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .stats-card h4 {
+            margin: 0;
+            color: #495057;
+        }
+
+        /* Pomodoro Timer Styles */
+        #timer-display {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        #messageDisplay {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+        
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .timer-controls button {
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+        }
+
+        .timer-adjust {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .timer-adjust button {
+            padding: 0.5rem 1rem;
+            background: #007bff;
+        }
+
+        /* Timetable Editing Styles */
+        .timetable-edit-form {
+            display: flex;
+            gap: 0.5rem;
+            flex-grow: 1;
+            align-items: center;
+        }
+
+        .timetable-edit-form input, .timetable-edit-form select {
+            padding: 0.25rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .timetable-edit-form .day-select { width: 100px; }
+        .timetable-edit-form .time-input { width: 80px; }
+        .timetable-edit-form .subject-input { flex-grow: 1; }
+
+        .timetable-edit-form + .task-actions {
+            margin-left: 1rem;
+        }
+
+        /* Study Plan Styles */
+        .plan-step {
+            display: flex;
+            align-items: center;
+        }
+
+        .plan-step-complete-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            font-size: 1rem;
+            line-height: 1;
+        }
+        
+        .plan-step.completed {
+            background-color: #f0fff0;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+        }
+        
+        .plan-step.completed .plan-step-complete-btn {
+            background: #ccc;
+            cursor: default;
+        }
+
+        /* History Card Styles */
+        #historyLog li {
+            font-size: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        #historyLog li span {
+            width: 100%;
+        }
+
+        /* Global Message Box */
+        #messageBox {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #messageBox.show {
+            opacity: 1;
+        }
+
+        /* Mood Selector Modal */
+        #moodSelectorModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+        
+        #moodSelectorModal.visible {
+            display: flex;
+        }
+
+        .mood-content {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mood-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+
+        .mood-emoji {
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .mood-emoji:hover {
+            transform: scale(1.2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h1>Study Planner Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div id="messageBox"></div>
+
+    <div class="dashboard-container">
+        <div class="welcome-section">
+            <h2>Welcome, <span id="welcomeName">Student</span>!</h2>
+            <p>Your personalized study hub is ready.</p>
+            <span id="userIdDisplay">Connecting...</span>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>My To-Do List</h3>
+                <div class="stats-card">
+                    <h4>Tasks Completed: <span id="tasksCompleted">0</span></h4>
+                </div>
+                <form id="addTaskForm" class="add-form">
+                    <input type="text" id="taskInput" placeholder="Add a new task..." required>
+                    <button type="submit">Add</button>
+                </form>
+                <ul id="todoList">
+                    </ul>
+            </div>
+
+            <div class="card">
+                <h3>Study Timer</h3>
+                <div class="timer-adjust">
+                    <button id="decreaseTimeBtn">- 1 min</button>
+                    <div id="timer-display">25:00</div>
+                    <button id="increaseTimeBtn">+ 1 min</button>
+                </div>
+                
+                <div id="messageDisplay">Ready to focus?</div>
+                <div class="timer-controls">
+                    <button id="start-timer">Start</button>
+                    <button id="pause-timer">Pause</button>
+                    <button id="reset-timer">Reset</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Study Plan Generator</h3>
+                <div class="add-form">
+                    <input type="text" id="topicInput" placeholder="Enter topic (e.g., WWII, Calculus)">
+                    <button id="generatePlanBtn">Generate Plan</button>
+                </div>
+                <div id="planDisplay">
+                    <p id="planPlaceholder" style="color: #666; font-style: italic;"></p>
+                    </div>
+            </div>
+            
+            <div class="card">
+                <h3>Weekly Timetable</h3>
+                <form id="addTimetableForm" class="add-form">
+                    <select id="timetableDay" required>
+                        <option value="" disabled selected>Select Day</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                    <input type="time" id="timetableTime" required>
+                    <input type="text" id="timetableSubject" placeholder="Subject" required>
+                    <button type="submit">Add</button>
+                </form>
+                <ul id="timetableList">
+                    <p id="timetablePlaceholder" style="color: #666; font-style: italic;">No classes scheduled.</p>
+                    </ul>
+            </div>
+
+            <div class="card">
+                <h3>Upcoming Schedule</h3>
+                <form id="addEventForm" class="add-form">
+                    <input type="text" id="eventInput" placeholder="Event (e.g., History Exam)" required>
+                    <input type="date" id="eventDate" required>
+                    <button type="submit">Add</button>
+                </form>
+                <ul id="scheduleList">
+                    </ul>
+            </div>
+
+            <div class="card">
+                <h3>Study Session History</h3>
+                <ul id="historyLog">
+                    <p id="noHistoryMessage" style="color: #666; font-style: italic;">No sessions logged yet.</p>
+                    </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="moodSelectorModal">
+        <div class="mood-content">
+            <h3>How do you feel after that session?</h3>
+            <div class="mood-options">
+                <button class="mood-emoji" data-mood="great" data-message="That's awesome! Keep the energy going.">🚀</button>
+                <button class="mood-emoji" data-mood="good" data-message="Good job on focusing! Time for a short break.">😊</button>
+                <button class="mood-emoji" data-mood="okay" data-message="It was okay. You showed up, and that's what matters.">👍</button>
+                <button class="mood-emoji" data-mood="tired" data-message="Take a longer rest. You earned it!">😴</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // LOCAL MODE IMPLEMENTATION
+        document.getElementById('userIdDisplay').textContent = "Local Mode";
+        const messageBox = document.getElementById('messageBox');
+        function showMessage(message) {
+            messageBox.textContent = message;
+            messageBox.classList.add('show');
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- To-Do List ---
+        let todoTasks = [];
+        const addTaskForm = document.getElementById("addTaskForm");
+        const taskInput = document.getElementById("taskInput");
+        const todoList = document.getElementById("todoList");
+        const tasksCompletedSpan = document.getElementById("tasksCompleted");
+
+        function renderTasks(tasks) {
+            todoList.innerHTML = '';
+            let completedCount = 0;
+            tasks.forEach(task => { if (task.completed) completedCount++; });
+            tasksCompletedSpan.textContent = completedCount;
+            const incompleteTasks = tasks.filter(task => !task.completed);
+            if (incompleteTasks.length === 0) {
+                const emptyMessage = document.createElement('li');
+                emptyMessage.style.fontStyle = 'italic';
+                emptyMessage.style.color = '#888';
+                emptyMessage.style.justifyContent = 'center';
+                emptyMessage.style.borderBottom = 'none';
+                emptyMessage.textContent = 'All done! Time to relax or add a new task.';
+                todoList.appendChild(emptyMessage);
+                return;
+            }
+            incompleteTasks.forEach((task) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${task.text}</span>
+                    <div class="task-actions">
+                        <button class="complete-btn" data-id="${task.id}">Complete</button>
+                        <button class="delete-btn" data-id="${task.id}">Delete</button>
+                    </div>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+
+        addTaskForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const text = taskInput.value.trim();
+            if (text) {
+                const newTask = { id: Date.now().toString(), text, completed: false, createdAt: new Date() };
+                todoTasks.push(newTask);
+                renderTasks(todoTasks);
+                taskInput.value = '';
+                showMessage("Successfully added");
+            }
+        });
+
+        todoList.addEventListener("click", function(event) {
+            const taskId = event.target.dataset.id;
+            if (!taskId) return;
+            const idx = todoTasks.findIndex(t => t.id === taskId);
+            if (idx === -1) return;
+            if (event.target.classList.contains('delete-btn')) {
+                todoTasks.splice(idx, 1);
+                renderTasks(todoTasks);
+                showMessage("Task deleted.");
+            } else if (event.target.classList.contains('complete-btn')) {
+                todoTasks[idx].completed = true;
+                renderTasks(todoTasks);
+                showMessage("Task completed!");
+            }
+        });
+
+        // --- Study Timer & Emoji Review ---
+        let timer;
+        let sessionDuration = 25 * 60;
+        let timeLeft = sessionDuration;
+        let isRunning = false;
+        let lastSessionName = '';
+        const timerDisplay = document.getElementById('timer-display');
+        const startBtn = document.getElementById('start-timer');
+        const pauseBtn = document.getElementById('pause-timer');
+        const resetBtn = document.getElementById('reset-timer');
+        const messageDisplay = document.getElementById('messageDisplay');
+        const moodSelectorModal = document.getElementById('moodSelectorModal');
+        const moodEmojis = document.querySelectorAll('.mood-emoji');
+        let studyHistory = [];
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+        function updateTimeDisplay() { timerDisplay.textContent = formatTime(timeLeft); }
+        function startTimer() {
+            if (isRunning) return;
+            isRunning = true;
+            messageDisplay.textContent = "Session in progress...";
+            timer = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimeDisplay();
+                } else {
+                    clearInterval(timer);
+                    isRunning = false;
+                    messageDisplay.textContent = "Session complete!";
+                    moodSelectorModal.classList.add('visible');
+                }
+            }, 1000);
+        }
+        function pauseTimer() {
+            if (!isRunning) return;
+            isRunning = false;
+            clearInterval(timer);
+            messageDisplay.textContent = "Paused.";
+        }
+        function resetTimer() {
+            isRunning = false;
+            clearInterval(timer);
+            timeLeft = sessionDuration;
+            updateTimeDisplay();
+            messageDisplay.textContent = "Ready to focus?";
+        }
+        function adjustTime(amount) {
+            if (isRunning) { showMessage("Cannot change time while the timer is running."); return; }
+            sessionDuration += amount;
+            if (sessionDuration < 60) { sessionDuration = 60; }
+            if (sessionDuration > 3600) { sessionDuration = 3600; }
+            timeLeft = sessionDuration;
+            updateTimeDisplay();
+        }
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        document.getElementById('increaseTimeBtn').addEventListener('click', () => adjustTime(60));
+        document.getElementById('decreaseTimeBtn').addEventListener('click', () => adjustTime(-60));
+
+        // Emoji review modal
+        moodEmojis.forEach(emoji => {
+            emoji.addEventListener('click', function(e) {
+                const mood = emoji.textContent;
+                const sessionName = lastSessionName || 'Study Session';
+                studyHistory.push({ emoji: mood, session: sessionName, time: new Date().toLocaleString() });
+                renderHistory();
+                moodSelectorModal.classList.remove('visible');
+                resetTimer();
+                showMessage("Session logged!");
+            });
+        });
+
+        function renderHistory() {
+            const historyLog = document.getElementById('historyLog');
+            if (studyHistory.length === 0) {
+                historyLog.innerHTML = '<p id="noHistoryMessage" style="color: #666; font-style: italic;">No sessions logged yet.</p>';
+                return;
+            }
+            historyLog.innerHTML = '';
+            studyHistory.forEach(h => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${h.emoji} ${h.session}</span><span style="font-size: 0.9rem; color: #777;">${h.time}</span>`;
+                historyLog.appendChild(li);
+            });
+        }
+
+        // --- Study Plan Generator ---
+        let currentPlan = null;
+        const topicInput = document.getElementById('topicInput');
+        const generatePlanBtn = document.getElementById('generatePlanBtn');
+        const planDisplay = document.getElementById('planDisplay');
+        function renderPlan() {
+            if (!currentPlan) {
+                planDisplay.innerHTML = '<p id="planPlaceholder" style="color: #666; font-style: italic;">No plan generated yet.</p>';
+                return;
+            }
+            let html = `<h4>Plan for ${currentPlan.topic}</h4><ul>`;
+            currentPlan.steps.forEach((step, i) => {
+                html += `<li class="plan-step${step.completed ? ' completed' : ''}"><span>${step.text}</span> <button class="plan-step-complete-btn" data-step="${i}">${step.completed ? '✔' : 'Done'}</button></li>`;
+            });
+            html += '</ul>';
+            planDisplay.innerHTML = html;
+        }
+        generatePlanBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const topic = topicInput.value.trim();
+            if (!topic) { showMessage("Enter a topic!"); return; }
+            currentPlan = {
+                topic,
+                steps: [
+                    { text: `Read about ${topic}`, completed: false },
+                    { text: `Take notes on ${topic}`, completed: false },
+                    { text: `Practice questions for ${topic}`, completed: false },
+                    { text: `Review and summarize ${topic}`, completed: false }
+                ]
+            };
+            renderPlan();
+            showMessage("Plan generated!");
+        });
+        planDisplay.addEventListener('click', function(e) {
+            if (e.target.classList.contains('plan-step-complete-btn')) {
+                const idx = parseInt(e.target.dataset.step);
+                if (!isNaN(idx) && currentPlan && !currentPlan.steps[idx].completed) {
+                    currentPlan.steps[idx].completed = true;
+                    renderPlan();
+                    showMessage("Step marked complete!");
+                }
+            }
+        });
+
+        // --- Upcoming Schedule ---
+        let scheduleEvents = [];
+        const addEventForm = document.getElementById('addEventForm');
+        const eventInput = document.getElementById('eventInput');
+        const eventDate = document.getElementById('eventDate');
+        const scheduleList = document.getElementById('scheduleList');
+
+        function renderEvents() {
+            scheduleList.innerHTML = '';
+            if (scheduleEvents.length === 0) {
+                scheduleList.innerHTML = '<li>No events scheduled.</li>';
+                return;
+            }
+            scheduleEvents.forEach(ev => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${ev.date} - ${ev.text}</span> <button class="delete-btn" data-id="${ev.id}">Delete</button>`;
+                scheduleList.appendChild(li);
+            });
+        }
+        addEventForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const text = eventInput.value.trim();
+            const date = eventDate.value;
+            if (!text || !date) { showMessage("Enter event and date!"); return; }
+            scheduleEvents.push({ id: Date.now().toString(), text, date });
+            renderEvents();
+            eventInput.value = '';
+            eventDate.value = '';
+            showMessage("Schedule added!");
+        });
+        scheduleList.addEventListener('click', function(e) {
+            const id = e.target.dataset.id;
+            if (!id) return;
+            const idx = scheduleEvents.findIndex(ev => ev.id === id);
+            if (idx !== -1) {
+                scheduleEvents.splice(idx, 1);
+                renderEvents();
+                showMessage("Event deleted.");
+            }
+        });
+
+        // --- Timetable (Stubbed, not requested for change) ---
+        // --- Weekly Timetable ---
+        let timetableEntries = [];
+        const addTimetableForm = document.getElementById('addTimetableForm');
+        const timetableDay = document.getElementById('timetableDay');
+        const timetableTime = document.getElementById('timetableTime');
+        const timetableSubject = document.getElementById('timetableSubject');
+        const timetableList = document.getElementById('timetableList');
+
+        function renderTimetable() {
+            timetableList.innerHTML = '';
+            if (timetableEntries.length === 0) {
+                timetableList.innerHTML = '<p id="timetablePlaceholder" style="color: #666; font-style: italic;">No classes scheduled.</p>';
+                return;
+            }
+            timetableEntries.forEach(entry => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${entry.day} ${entry.time} - ${entry.subject}</span> <button class="delete-btn" data-id="${entry.id}">Delete</button>`;
+                timetableList.appendChild(li);
+            });
+        }
+        addTimetableForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const day = timetableDay.value;
+            const time = timetableTime.value;
+            const subject = timetableSubject.value.trim();
+            if (!day || !time || !subject) { showMessage("Enter all timetable details!"); return; }
+            timetableEntries.push({ id: Date.now().toString(), day, time, subject });
+            renderTimetable();
+            timetableDay.value = '';
+            timetableTime.value = '';
+            timetableSubject.value = '';
+            showMessage("Timetable added!");
+        });
+        timetableList.addEventListener('click', function(e) {
+            const id = e.target.dataset.id;
+            if (!id) return;
+            const idx = timetableEntries.findIndex(entry => entry.id === id);
+            if (idx !== -1) {
+                timetableEntries.splice(idx, 1);
+                renderTimetable();
+                showMessage("Timetable entry deleted.");
+            }
+        });
+
+        window.logout = function() { location.reload(); };
+        renderTasks(todoTasks);
+        renderHistory();
+        renderPlan();
+        renderEvents();
+        renderTimetable();
+        resetTimer();
+    </script>
+</body>
+</html>

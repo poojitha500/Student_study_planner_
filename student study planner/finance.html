@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, #ff758c, #e85d75);
+            padding: 1rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .navbar .logout-btn {
+            background: none;
+            border: 2px solid white;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+            font-weight: 600;
+        }
+
+        .navbar .logout-btn:hover {
+            background: white;
+            color: #ff758c;
+        }
+
+        .dashboard-container {
+            padding: 2rem;
+        }
+
+        .welcome-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-section h2 {
+            color: #e85d75;
+            margin-top: 0;
+        }
+
+        .dashboard-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: space-between;
+        }
+
+        .card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            flex: 1 1 45%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            color: #ff758c;
+            margin-top: 0;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        li {
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        li:last-child {
+            border-bottom: none;
+        }
+        
+        .add-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-form input {
+            flex-grow: 1;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        
+        .add-form button {
+            padding: 0.5rem 1rem;
+            background: #ff758c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .card button {
+            background: #e85d75;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+        }
+        
+        .balance-card {
+            background: #e9ecef;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .balance-card h4 {
+            margin: 0;
+            color: #495057;
+        }
+
+        .income-item {
+            color: #28a745;
+        }
+        .expense-item {
+            color: #dc3545;
+        }
+
+        .goal-progress-bar {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .progress {
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .goal-stars {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .star {
+            font-size: 2rem;
+            color: #ccc;
+            transition: color 0.5s;
+        }
+
+        .star.filled {
+            color: gold;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Financial Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="welcome-section">
+            <h2>Welcome, <span id="welcomeName">Student</span>!</h2>
+            <p>Manage your finances and achieve your goals.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Current Balance</h3>
+                <div class="balance-card">
+                    <h4>Total: $<span id="currentBalance">0.00</span></h4>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Set Monthly Goal</h3>
+                <form id="setGoalForm" class="add-form">
+                    <input type="number" id="goalAmountInput" placeholder="Monthly Goal Amount" step="1" required>
+                    <button type="submit">Set</button>
+                </form>
+                <div id="goalDisplay" style="display: none;">
+                    <p>Monthly Goal: $<span id="goalAmount">0.00</span></p>
+                    <div class="goal-progress-bar">
+                        <div class="progress" id="goalProgress"></div>
+                    </div>
+                    <p>Progress: <span id="goalProgressText">0%</span></p>
+                </div>
+                <div class="goal-stars">
+                    <span class="star" data-month="0">★</span>
+                    <span class="star" data-month="1">★</span>
+                    <span class="star" data-month="2">★</span>
+                    <span class="star" data-month="3">★</span>
+                    <span class="star" data-month="4">★</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Add Transaction</h3>
+                <form id="addTransactionForm" class="add-form">
+                    <input type="text" id="descriptionInput" placeholder="Description" required>
+                    <input type="number" id="amountInput" placeholder="Amount" step="0.01" required>
+                    <select id="typeSelect" required>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                    <button type="submit">Add</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h3>Transaction History</h3>
+                <ul id="transactionList">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Core Functions ---
+        const loggedInUser = localStorage.getItem('loggedInUser');
+        const transactionsKey = `transactions_${loggedInUser}`;
+        const goalsKey = `goals_${loggedInUser}`;
+
+        if (!loggedInUser) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('welcomeName').textContent = loggedInUser;
+
+        function saveItems(key, items) {
+            localStorage.setItem(key, JSON.stringify(items));
+        }
+
+        function loadItems(key) {
+            const items = localStorage.getItem(key);
+            return items ? JSON.parse(items) : [];
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'login.html';
+        }
+
+        // --- Financial Dashboard Logic ---
+        const addTransactionForm = document.getElementById("addTransactionForm");
+        const descriptionInput = document.getElementById("descriptionInput");
+        const amountInput = document.getElementById("amountInput");
+        const typeSelect = document.getElementById("typeSelect");
+        const transactionList = document.getElementById("transactionList");
+        const currentBalanceSpan = document.getElementById("currentBalance");
+        const setGoalForm = document.getElementById("setGoalForm");
+        const goalAmountInput = document.getElementById("goalAmountInput");
+        const goalDisplay = document.getElementById("goalDisplay");
+        const goalAmountSpan = document.getElementById("goalAmount");
+        const goalProgress = document.getElementById("goalProgress");
+        const goalProgressText = document.getElementById("goalProgressText");
+        const stars = document.querySelectorAll('.star');
+
+        let transactions = loadItems(transactionsKey);
+        let goals = loadItems(goalsKey);
+        let currentMonthGoal = goals[0] || {};
+        let initialBalance = currentMonthGoal.initialBalance || 0;
+
+        function getCurrentMonthKey() {
+            const date = new Date();
+            return `${date.getFullYear()}-${date.getMonth()}`;
+        }
+
+        function calculateMonthlyBalance() {
+            const currentMonth = getCurrentMonthKey();
+            const monthlyTransactions = transactions.filter(t => t.month === currentMonth);
+            const monthlyBalance = monthlyTransactions.reduce((total, t) => {
+                const amount = parseFloat(t.amount);
+                return t.type === 'income' ? total + amount : total - amount;
+            }, 0);
+            return monthlyBalance;
+        }
+
+        function renderDashboard() {
+            const totalBalance = transactions.reduce((total, t) => {
+                const amount = parseFloat(t.amount);
+                return t.type === 'income' ? total + amount : total - amount;
+            }, 0);
+            
+            currentBalanceSpan.textContent = totalBalance.toFixed(2);
+            renderTransactions();
+            updateGoalDisplay();
+            updateStars();
+        }
+
+        function renderTransactions() {
+            transactionList.innerHTML = '';
+            transactions.forEach((transaction, index) => {
+                const li = document.createElement('li');
+                const amountClass = transaction.type === 'income' ? 'income-item' : 'expense-item';
+                const sign = transaction.type === 'income' ? '+' : '-';
+                
+                li.innerHTML = `
+                    <span>${transaction.description}</span>
+                    <span class="${amountClass}">${sign}$${parseFloat(transaction.amount).toFixed(2)}</span>
+                    <button class="delete-btn" data-index="${index}">Delete</button>
+                `;
+                transactionList.appendChild(li);
+            });
+        }
+
+        function updateGoalDisplay() {
+            if (currentMonthGoal.amount) {
+                goalDisplay.style.display = 'block';
+                goalAmountSpan.textContent = parseFloat(currentMonthGoal.amount).toFixed(2);
+                
+                const monthlyBalance = calculateMonthlyBalance();
+                const progress = Math.min((monthlyBalance / currentMonthGoal.amount) * 100, 100);
+                goalProgress.style.width = `${progress}%`;
+                goalProgressText.textContent = `${progress.toFixed(0)}%`;
+            } else {
+                goalDisplay.style.display = 'none';
+            }
+        }
+
+        function updateStars() {
+            stars.forEach((star, index) => {
+                if (index < goals.filter(g => g.achieved).length) {
+                    star.classList.add('filled');
+                } else {
+                    star.classList.remove('filled');
+                }
+            });
+        }
+
+        function checkIfGoalMet() {
+            const monthlyBalance = calculateMonthlyBalance();
+            if (currentMonthGoal.amount && monthlyBalance >= currentMonthGoal.amount && !currentMonthGoal.achieved) {
+                currentMonthGoal.achieved = true;
+                saveItems(goalsKey, goals);
+                alert("Congratulations! You've met your monthly financial goal!");
+                updateStars();
+            }
+        }
+
+        addTransactionForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const description = descriptionInput.value.trim();
+            const amount = parseFloat(amountInput.value);
+            const type = typeSelect.value;
+            const month = getCurrentMonthKey();
+            
+            if (description && !isNaN(amount) && amount > 0) {
+                transactions.push({ description, amount, type, month });
+                saveItems(transactionsKey, transactions);
+                renderDashboard();
+                checkIfGoalMet();
+                descriptionInput.value = '';
+                amountInput.value = '';
+            }
+        });
+
+        transactionList.addEventListener("click", function(event) {
+            if (event.target.classList.contains('delete-btn')) {
+                const index = event.target.dataset.index;
+                transactions.splice(index, 1);
+                saveItems(transactionsKey, transactions);
+                renderDashboard();
+            }
+        });
+
+        setGoalForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+            const newGoalAmount = parseFloat(goalAmountInput.value);
+            if (!isNaN(newGoalAmount) && newGoalAmount > 0) {
+                const currentMonth = getCurrentMonthKey();
+                const existingGoalIndex = goals.findIndex(g => g.month === currentMonth);
+
+                if (existingGoalIndex !== -1) {
+                    goals[existingGoalIndex].amount = newGoalAmount;
+                    goals[existingGoalIndex].achieved = false;
+                    currentMonthGoal = goals[existingGoalIndex];
+                } else {
+                    currentMonthGoal = {
+                        month: currentMonth,
+                        amount: newGoalAmount,
+                        achieved: false
+                    };
+                    goals.unshift(currentMonthGoal); // Add to the beginning to track latest goals
+                }
+                
+                saveItems(goalsKey, goals);
+                renderDashboard();
+            }
+        });
+
+        renderDashboard();
+    </script>
+</body>
+</html>
